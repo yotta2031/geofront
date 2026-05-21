@@ -1,7 +1,7 @@
 {
   "name": "geo-crm-backend",
   "version": "1.0.0",
-  "description": "灵雯GEO智能优化系统 - 后端服务",
+  "description": "析探GEO智能优化系统 - 后端服务",
   "private": true,
   "type": "module",
   "scripts": {

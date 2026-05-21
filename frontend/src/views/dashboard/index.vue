@@ -2,7 +2,7 @@
   <div class="dashboard">
     <!-- 数据卡片 -->
     <el-row :gutter="20">
-      <el-col :span="6" v-for="item in statCards" :key="item.title">
+      <el-col :xs="24" :sm="12" :md="6" v-for="item in statCards" :key="item.title">
         <el-card class="stat-card" shadow="hover">
           <div class="stat-icon" :style="{ background: item.gradient }">
             <el-icon :size="24" color="#fff">
@@ -19,10 +19,10 @@
 
     <!-- 图表区域 -->
     <el-row :gutter="20" class="mt-4">
-      <el-col :span="16">
+      <el-col :xs="24" :lg="16">
         <el-card shadow="hover">
           <template #header>
-            <div class="card-header">
+            <div class="page-card-header">
               <span>数据趋势</span>
               <el-radio-group v-model="chartPeriod" size="small">
                 <el-radio-button label="week">本周</el-radio-button>
@@ -30,13 +30,13 @@
               </el-radio-group>
             </div>
           </template>
-          <div ref="chartRef" style="height: 300px;"></div>
+          <div ref="chartRef" class="chart-box"></div>
         </el-card>
       </el-col>
-      <el-col :span="8">
+      <el-col :xs="24" :lg="8" class="mt-4 mt-lg-0">
         <el-card shadow="hover">
           <template #header>
-            <div class="card-header">
+            <div class="page-card-header">
               <span>任务状态</span>
             </div>
           </template>
@@ -59,7 +59,7 @@
       <el-col :span="24">
         <el-card shadow="hover">
           <template #header>
-            <div class="card-header">
+            <div class="page-card-header">
               <span>快捷操作</span>
             </div>
           </template>
@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import {
   Document,
   TrendCharts,
@@ -95,6 +95,7 @@ import {
 import * as echarts from 'echarts'
 
 const chartRef = ref<HTMLElement>()
+let chartInstance: echarts.ECharts | null = null
 const chartPeriod = ref('week')
 
 const statCards = ref([
@@ -118,10 +119,14 @@ const quickActions = ref([
   { name: '关键词拓词', type: 'info', icon: Tools, path: '/tools' }
 ])
 
+function handleResize() {
+  chartInstance?.resize()
+}
+
 onMounted(() => {
   if (chartRef.value) {
-    const chart = echarts.init(chartRef.value)
-    chart.setOption({
+    chartInstance = echarts.init(chartRef.value)
+    chartInstance.setOption({
       tooltip: { trigger: 'axis' },
       xAxis: {
         type: 'category',
@@ -155,7 +160,14 @@ onMounted(() => {
         }
       ]
     })
+    window.addEventListener('resize', handleResize)
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  chartInstance?.dispose()
+  chartInstance = null
 })
 </script>
 
@@ -200,10 +212,16 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.chart-box {
+  height: 280px;
+  width: 100%;
+  min-height: 220px;
+}
+
+@media (min-width: 992px) {
+  .mt-lg-0 {
+    margin-top: 0 !important;
+  }
 }
 
 .task-stats {
@@ -233,5 +251,18 @@ onMounted(() => {
 
 .quick-actions .el-button {
   min-width: 120px;
+  flex: 1 1 auto;
+}
+
+@media (max-width: 768px) {
+  .quick-actions .el-button {
+    min-width: calc(50% - 8px);
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-actions .el-button {
+    min-width: 100%;
+  }
 }
 </style>

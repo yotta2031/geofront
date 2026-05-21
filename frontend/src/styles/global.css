@@ -1,0 +1,91 @@
+/* 全局基础 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'PingFang SC',
+    'Microsoft YaHei',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #303133;
+  background: #f6f6f6;
+  overflow-x: hidden;
+}
+
+/* 页面通用 */
+.page-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 主内容区：卡片与表格在小屏可横向滚动 */
+.main-content .el-card__body {
+  overflow-x: auto;
+}
+
+.main-content .el-table {
+  min-width: 600px;
+}
+
+/* 分页器换行 */
+.el-pagination {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  justify-content: flex-end;
+}
+
+/* 表单小屏标签置顶 */
+@media (max-width: 768px) {
+  .responsive-form.el-form--default .el-form-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .responsive-form .el-form-item__label {
+    width: 100% !important;
+    justify-content: flex-start;
+    padding-bottom: 4px;
+  }
+
+  .responsive-form .el-form-item__content {
+    margin-left: 0 !important;
+  }
+
+  .responsive-form .el-checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

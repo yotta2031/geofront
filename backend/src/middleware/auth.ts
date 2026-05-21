@@ -21,8 +21,8 @@ export async function authMiddleware(c: Context, next: Next) {
     
     // 将用户信息附加到上下文
     c.set("user", payload);
-    await next();
-  } catch (error) {
+    return await next();
+  } catch {
     return c.json({ code: 0, msg: "认证令牌无效或已过期" }, 401);
   }
 }

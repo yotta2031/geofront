@@ -1,7 +1,7 @@
 <template>
   <div class="profile-page">
     <el-row :gutter="20">
-      <el-col :span="8">
+      <el-col :xs="24" :md="8">
         <el-card shadow="hover">
           <div class="user-info">
             <el-avatar :size="80" :src="userStore.avatar || defaultAvatar" />
@@ -22,7 +22,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="16">
+      <el-col :xs="24" :md="16" class="profile-main-col">
         <el-card shadow="hover">
           <template #header>
             <div class="card-header">
@@ -51,7 +51,7 @@
               <span>会员信息</span>
             </div>
           </template>
-          <el-descriptions :column="2" border>
+          <el-descriptions :column="descriptionColumns" border>
             <el-descriptions-item label="会员等级">普通会员</el-descriptions-item>
             <el-descriptions-item label="有效期">2027-01-15</el-descriptions-item>
             <el-descriptions-item label="存储空间">304M / 1000M</el-descriptions-item>
@@ -66,11 +66,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 
 const userStore = useUserStore()
+const { isMobile } = useBreakpoint()
+const descriptionColumns = computed(() => (isMobile.value ? 1 : 2))
 const saving = ref(false)
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
@@ -142,6 +145,16 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.profile-main-col {
+  margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+  .profile-main-col {
+    margin-top: 0;
+  }
 }
 
 .mt-4 {
