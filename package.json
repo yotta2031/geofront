@@ -1,0 +1,25 @@
+{
+  "name": "geo-crm-system",
+  "version": "1.0.0",
+  "description": "灵雯GEO智能优化系统 - 现代技术栈重构版",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "lint": "eslint . --ext .vue,.ts,.tsx,.js,.jsx",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,vue,json,md}\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0"
+  }
+}
