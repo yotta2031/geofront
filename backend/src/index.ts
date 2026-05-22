@@ -12,6 +12,10 @@ import { userRoutes } from "./routes/user.js";
 import { diagnosisRoutes } from "./routes/diagnosis.js";
 import { articleRoutes } from "./routes/article.js";
 import { publishRoutes } from "./routes/publish.js";
+import { webmediaRoutes } from "./routes/webmedia.js";
+import { weixinRoutes } from "./routes/weixin.js";
+import { zimediaRoutes } from "./routes/zimedia.js";
+import { siteRoutes } from "./routes/site.js";
 import { toolRoutes } from "./routes/tool.js";
 import { v1Routes } from "./routes/v1.js";
 import { errorHandler } from "./middleware/error.js";
@@ -59,6 +63,10 @@ app.route("/api/users", userRoutes);
 app.route("/api/diagnosis", diagnosisRoutes);
 app.route("/api/articles", articleRoutes);
 app.route("/api/publish", publishRoutes);
+app.route("/api/webmedia", webmediaRoutes);
+app.route("/api/weixin", weixinRoutes);
+app.route("/api/zimedia", zimediaRoutes);
+app.route("/api/site", siteRoutes);
 app.route("/api/tools", toolRoutes);
 
 // 生产环境：托管前端静态资源（单端口部署）

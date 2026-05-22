@@ -73,26 +73,118 @@ const routes = [
           {
             path: '/publish/webmedia',
             name: 'Webmedia',
-            component: () => import('@/views/publish/webmedia.vue'),
-            meta: { title: '网站媒体' }
+            component: () => import('@/views/publish/webmedia/layout.vue'),
+            meta: { title: '网站媒体' },
+            children: [
+              {
+                path: '',
+                name: 'WebmediaIndex',
+                component: () => import('@/views/publish/webmedia/index.vue'),
+                meta: { title: '媒体库' }
+              },
+              {
+                path: 'single',
+                name: 'WebmediaSingle',
+                component: () => import('@/views/publish/webmedia/single.vue'),
+                meta: { title: '单条发布' }
+              },
+              {
+                path: 'tasks',
+                name: 'WebmediaTasks',
+                component: () => import('@/views/publish/webmedia/tasks.vue'),
+                meta: { title: 'AI智能发布' }
+              },
+              {
+                path: 'records',
+                name: 'WebmediaRecords',
+                component: () => import('@/views/publish/webmedia/records.vue'),
+                meta: { title: '投稿记录' }
+              },
+              {
+                path: 'favorites',
+                name: 'WebmediaFavorites',
+                component: () => import('@/views/publish/webmedia/favorites.vue'),
+                meta: { title: '收藏分组' }
+              }
+            ]
           },
           {
             path: '/publish/zimedia',
-            name: 'Zimedia',
-            component: () => import('@/views/publish/zimedia.vue'),
-            meta: { title: '自媒体大V' }
+            name: 'ZimediaPublish',
+            component: () => import('@/views/publish/zimedia/layout.vue'),
+            meta: { title: '自媒体大V' },
+            children: [
+              {
+                path: '',
+                name: 'ZimediaAccounts',
+                component: () => import('@/views/publish/zimedia/accounts.vue'),
+                meta: { title: '大V账号' }
+              },
+              {
+                path: 'tasks',
+                name: 'ZimediaTasks',
+                component: () => import('@/views/publish/zimedia/tasks.vue'),
+                meta: { title: '发布任务' }
+              },
+              {
+                path: 'records',
+                name: 'ZimediaRecords',
+                component: () => import('@/views/publish/zimedia/records.vue'),
+                meta: { title: '发布记录' }
+              }
+            ]
           },
           {
             path: '/publish/weixin',
             name: 'WeixinPublish',
-            component: () => import('@/views/publish/weixin.vue'),
-            meta: { title: '个人自媒体' }
+            component: () => import('@/views/publish/weixin/layout.vue'),
+            meta: { title: '个人自媒体' },
+            children: [
+              {
+                path: '',
+                name: 'WeixinAccounts',
+                component: () => import('@/views/publish/weixin/accounts.vue'),
+                meta: { title: '账号授权' }
+              },
+              {
+                path: 'tasks',
+                name: 'WeixinTasks',
+                component: () => import('@/views/publish/weixin/tasks.vue'),
+                meta: { title: '发布任务' }
+              },
+              {
+                path: 'records',
+                name: 'WeixinRecords',
+                component: () => import('@/views/publish/weixin/records.vue'),
+                meta: { title: '发布记录' }
+              }
+            ]
           },
           {
             path: '/publish/site',
             name: 'SitePublish',
-            component: () => import('@/views/publish/site.vue'),
-            meta: { title: 'AI官网SEO' }
+            component: () => import('@/views/publish/site/layout.vue'),
+            meta: { title: 'AI官网SEO' },
+            children: [
+              {
+                path: '',
+                name: 'SiteWebsites',
+                component: () => import('@/views/publish/site/websites.vue'),
+                meta: { title: '站点管理' }
+              },
+              {
+                path: 'tasks',
+                name: 'SiteTasks',
+                component: () => import('@/views/publish/site/tasks.vue'),
+                meta: { title: '发布任务' }
+              },
+              {
+                path: 'records',
+                name: 'SiteRecords',
+                component: () => import('@/views/publish/site/records.vue'),
+                meta: { title: '发布记录' }
+              }
+            ]
           }
         ]
       },
