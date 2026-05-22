@@ -13,9 +13,11 @@ import { diagnosisRoutes } from "./routes/diagnosis.js";
 import { articleRoutes } from "./routes/article.js";
 import { publishRoutes } from "./routes/publish.js";
 import { toolRoutes } from "./routes/tool.js";
+import { v1Routes } from "./routes/v1.js";
 import { errorHandler } from "./middleware/error.js";
 import { authMiddleware } from "./middleware/auth.js";
 import type { AppEnv } from "./types.js";
+import { getReportByTaskId } from "./app/services/diagnoseService.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -42,8 +44,17 @@ app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOStri
 // 公开路由
 app.route("/api/auth", authRoutes);
 
+// 报告 HTML 预览（规格：/report/{task_id}.html）
+app.get("/report/:taskId.html", async (c) => {
+  const taskId = c.req.param("taskId") || "";
+  const report = await getReportByTaskId(taskId);
+  if (!report?.htmlContent) return c.text("报告未生成", 404);
+  return c.html(report.htmlContent);
+});
+
 // 需要认证的路由
 app.use("/api/*", authMiddleware);
+app.route("/api/v1", v1Routes);
 app.route("/api/users", userRoutes);
 app.route("/api/diagnosis", diagnosisRoutes);
 app.route("/api/articles", articleRoutes);

@@ -7,6 +7,8 @@ import {
   boolean,
   timestamp,
   doublePrecision,
+  uuid,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 // 用户表
@@ -23,6 +25,7 @@ export const users = pgTable("users", {
   storageUsed: integer("storage_used").default(0),
   storageTotal: integer("storage_total").default(1000),
   vipExpire: varchar("vip_expire", { length: 20 }),
+  role: varchar("role", { length: 30 }).default("client"),
   status: integer("status").default(1),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -139,5 +142,79 @@ export const moneyLogs = pgTable("money_logs", {
   remark: text("remark"),
   relatedId: integer("related_id"),
   relatedType: varchar("related_type", { length: 50 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// ========== GEO 规格表（.rule/all.txt） ==========
+
+export const brands = pgTable("brands", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: integer("user_id"),
+  name: varchar("name", { length: 255 }).notNull(),
+  aliases: jsonb("aliases").$type<string[]>().default([]),
+  industry: varchar("industry", { length: 255 }),
+  website: text("website"),
+  description: text("description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const geoTasks = pgTable("geo_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: integer("user_id").notNull(),
+  brandId: uuid("brand_id").references(() => brands.id),
+  status: varchar("status", { length: 30 }).default("queued"),
+  progress: integer("progress").default(0),
+  score: doublePrecision("score"),
+  platforms: jsonb("platforms").$type<string[]>().default([]),
+  keywords: text("keywords"),
+  industry: varchar("industry", { length: 255 }),
+  needOptimize: boolean("need_optimize").default(false),
+  suggestions: jsonb("suggestions").$type<string[]>().default([]),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
+
+export const llmResponses = pgTable("llm_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id")
+    .notNull()
+    .references(() => geoTasks.id, { onDelete: "cascade" }),
+  provider: varchar("provider", { length: 50 }).notNull(),
+  query: text("query").notNull(),
+  response: text("response").notNull(),
+  latencyMs: integer("latency_ms").default(0),
+  tokens: integer("tokens").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const visibilityScores = pgTable("visibility_scores", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id")
+    .notNull()
+    .references(() => geoTasks.id, { onDelete: "cascade" }),
+  provider: varchar("provider", { length: 50 }).notNull(),
+  mentionRate: doublePrecision("mention_rate").default(0),
+  positiveRate: doublePrecision("positive_rate").default(0),
+  rankScore: doublePrecision("rank_score").default(0),
+  sentimentScore: doublePrecision("sentiment_score").default(0),
+});
+
+export const competitors = pgTable("competitors", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id")
+    .notNull()
+    .references(() => geoTasks.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }).notNull(),
+  score: doublePrecision("score").default(0),
+});
+
+export const geoReports = pgTable("geo_reports", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  taskId: uuid("task_id")
+    .notNull()
+    .references(() => geoTasks.id, { onDelete: "cascade" }),
+  htmlUrl: text("html_url"),
+  pdfUrl: text("pdf_url"),
+  htmlContent: text("html_content"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
