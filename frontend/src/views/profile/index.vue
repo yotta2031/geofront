@@ -1,65 +1,87 @@
 <template>
   <div class="profile-page">
-    <el-row :gutter="20">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">个人中心</h1>
+        <p class="page-subtitle">管理账户信息与会员权益</p>
+      </div>
+    </header>
+
+    <el-row :gutter="16">
       <el-col :xs="24" :md="8">
-        <el-card shadow="hover">
-          <div class="user-info">
-            <el-avatar :size="80" :src="userStore.avatar || defaultAvatar" />
-            <h3>{{ userStore.nickname || userStore.username }}</h3>
-            <p class="user-role">普通会员</p>
-            <el-divider />
-            <div class="user-stats">
-              <div class="stat-item">
-                <div class="stat-value">{{ userStore.score }}</div>
-                <div class="stat-label">剩余点数</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value">¥{{ userStore.balance }}</div>
-                <div class="stat-label">账户余额</div>
-              </div>
+        <section class="panel user-card">
+          <div class="user-avatar-wrap">
+            <div class="user-avatar">{{ avatarChar }}</div>
+          </div>
+          <h3 class="user-name">{{ userStore.nickname || userStore.username }}</h3>
+          <p class="user-role">普通会员</p>
+          <div class="user-stats">
+            <div class="stat-item">
+              <div class="stat-value">{{ userStore.score }}</div>
+              <div class="stat-label">剩余点数</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <div class="stat-value">¥{{ userStore.balance }}</div>
+              <div class="stat-label">账户余额</div>
             </div>
           </div>
-        </el-card>
+        </section>
       </el-col>
 
-      <el-col :xs="24" :md="16" class="profile-main-col">
-        <el-card shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <span>个人设置</span>
+      <el-col :xs="24" :md="16" class="mt-4 mt-lg-0">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">个人设置</h2>
+              <p class="panel-desc">修改昵称、邮箱等基本信息</p>
             </div>
-          </template>
-          <el-form :model="form" label-width="100px">
+          </div>
+          <el-form :model="form" label-width="100px" class="profile-form">
             <el-form-item label="昵称">
-              <el-input v-model="form.nickname" />
+              <el-input v-model="form.nickname" placeholder="请输入昵称" />
             </el-form-item>
             <el-form-item label="邮箱">
-              <el-input v-model="form.email" />
+              <el-input v-model="form.email" placeholder="请输入邮箱" />
             </el-form-item>
             <el-form-item label="手机">
-              <el-input v-model="form.phone" />
+              <el-input v-model="form.phone" placeholder="请输入手机号" />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="saveProfile" :loading="saving">保存</el-button>
             </el-form-item>
           </el-form>
-        </el-card>
+        </section>
 
-        <el-card shadow="hover" class="mt-4">
-          <template #header>
-            <div class="card-header">
-              <span>会员信息</span>
+        <section class="panel mt-4">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">会员信息</h2>
+              <p class="panel-desc">当前会员等级与权益详情</p>
             </div>
-          </template>
-          <el-descriptions :column="descriptionColumns" border>
-            <el-descriptions-item label="会员等级">普通会员</el-descriptions-item>
-            <el-descriptions-item label="有效期">2027-01-15</el-descriptions-item>
-            <el-descriptions-item label="存储空间">304M / 1000M</el-descriptions-item>
-            <el-descriptions-item label="会员状态">
-              <el-tag type="success">正常</el-tag>
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-card>
+          </div>
+          <div class="member-grid">
+            <div class="member-item">
+              <span class="member-label">会员等级</span>
+              <span class="member-value">普通会员</span>
+            </div>
+            <div class="member-item">
+              <span class="member-label">有效期</span>
+              <span class="member-value">2027-01-15</span>
+            </div>
+            <div class="member-item">
+              <span class="member-label">存储空间</span>
+              <span class="member-value">304M / 1000M</span>
+            </div>
+            <div class="member-item">
+              <span class="member-label">会员状态</span>
+              <span class="member-badge">
+                <span class="badge-dot"></span>
+                正常
+              </span>
+            </div>
+          </div>
+        </section>
       </el-col>
     </el-row>
   </div>
@@ -69,13 +91,14 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
-import { useBreakpoint } from '@/composables/useBreakpoint'
 
 const userStore = useUserStore()
-const { isMobile } = useBreakpoint()
-const descriptionColumns = computed(() => (isMobile.value ? 1 : 2))
 const saving = ref(false)
-const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+
+const avatarChar = computed(() => {
+  const name = userStore.nickname || userStore.username || ''
+  return name.charAt(0).toUpperCase() || 'U'
+})
 
 const form = reactive({
   nickname: '',
@@ -94,7 +117,6 @@ async function saveProfile() {
 }
 
 onMounted(() => {
-  // 初始化表单数据
   if (userStore.userInfo) {
     form.nickname = userStore.userInfo.nickname || ''
     form.email = userStore.userInfo.email || ''
@@ -104,25 +126,50 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.user-info {
+.user-card {
   text-align: center;
-  padding: 20px 0;
+  padding: 28px 20px;
 }
 
-.user-info h3 {
-  margin: 16px 0 8px;
-  font-size: 18px;
+.user-avatar-wrap {
+  margin-bottom: 16px;
+}
+
+.user-avatar {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7c3aed, #a375f2);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+}
+
+.user-name {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--app-text-1);
 }
 
 .user-role {
-  color: #999;
-  font-size: 14px;
+  font-size: 13px;
+  color: var(--app-text-muted);
+  margin: 0 0 20px;
 }
 
 .user-stats {
   display: flex;
-  justify-content: space-around;
-  margin-top: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--app-border);
 }
 
 .stat-item {
@@ -132,32 +179,72 @@ onMounted(() => {
 .stat-value {
   font-size: 20px;
   font-weight: 600;
-  color: #4b17d3;
+  color: var(--el-color-primary);
+  font-feature-settings: 'tnum';
+  margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+  color: var(--app-text-muted);
 }
 
-.card-header {
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--app-border);
+}
+
+.profile-form {
+  max-width: 560px;
+}
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.member-item {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  background: #fafafd;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+}
+
+.member-label {
+  font-size: 12px;
+  color: var(--app-text-muted);
+}
+
+.member-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-text-1);
+}
+
+.member-badge {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #047857;
 }
 
-.profile-main-col {
-  margin-top: 20px;
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-success);
 }
 
-@media (min-width: 768px) {
-  .profile-main-col {
-    margin-top: 0;
+@media (max-width: 768px) {
+  .member-grid {
+    grid-template-columns: 1fr;
   }
-}
-
-.mt-4 {
-  margin-top: 20px;
 }
 </style>

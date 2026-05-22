@@ -1,39 +1,48 @@
 <template>
   <div class="keywords-page">
-    <el-card shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>关键词管理</span>
-          <el-button type="primary" @click="showAddDialog = true">
-            <el-icon><Plus /></el-icon>添加关键词
-          </el-button>
-        </div>
-      </template>
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">关键词管理</h1>
+        <p class="page-subtitle">维护核心词、长尾词与命中规则</p>
+      </div>
+      <el-button type="primary" :icon="Plus" @click="openCreate">添加关键词</el-button>
+    </header>
 
-      <el-table :data="keywords" style="width: 100%" v-loading="loading">
-        <el-table-column prop="keyword" label="关键词" />
-        <el-table-column prop="hitWord" label="命中词" />
-        <el-table-column prop="preKeywords" label="前置词" />
-        <el-table-column prop="nextKeywords" label="后置词" />
-        <el-table-column prop="type" label="类型" width="100">
-          <template #default="{ row }">
-            <el-tag size="small">{{ row.type }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="80">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
-              {{ row.status === 1 ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="editKeyword(row)">编辑</el-button>
-            <el-button type="danger" link @click="deleteKeyword(row.id)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">关键词列表</h2>
+          <p class="panel-desc">共 {{ total }} 条记录</p>
+        </div>
+      </div>
+
+      <div class="page-table-wrap">
+        <el-table :data="keywords" style="width: 100%" v-loading="loading">
+          <el-table-column prop="keyword" label="关键词" min-width="140" />
+          <el-table-column prop="hitWord" label="命中词" min-width="120" />
+          <el-table-column prop="preKeywords" label="前置词" min-width="120" />
+          <el-table-column prop="nextKeywords" label="后置词" min-width="120" />
+          <el-table-column prop="type" label="类型" width="100">
+            <template #default="{ row }">
+              <el-tag size="small" effect="light">{{ getTypeText(row.type) }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="90">
+            <template #default="{ row }">
+              <span class="status-pill" :class="row.status === 1 ? 'status-on' : 'status-off'">
+                <span class="status-dot"></span>
+                {{ row.status === 1 ? '启用' : '禁用' }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="140" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="editKeyword(row)">编辑</el-button>
+              <el-button type="danger" link @click="deleteKeyword(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <el-pagination
         class="mt-4"
@@ -45,9 +54,8 @@
         @size-change="fetchKeywords"
         @current-change="fetchKeywords"
       />
-    </el-card>
+    </section>
 
-    <!-- 添加/编辑弹窗 -->
     <el-dialog v-model="showAddDialog" :title="editingId ? '编辑关键词' : '添加关键词'" width="500px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="关键词">
@@ -110,6 +118,20 @@ function resetForm() {
   editingId.value = null
 }
 
+function getTypeText(type: string) {
+  const map: Record<string, string> = {
+    default: '默认',
+    core: '核心',
+    longtail: '长尾'
+  }
+  return map[type] || type
+}
+
+function openCreate() {
+  resetForm()
+  showAddDialog.value = true
+}
+
 function editKeyword(row: any) {
   editingId.value = row.id
   form.keyword = row.keyword
@@ -120,10 +142,9 @@ function editKeyword(row: any) {
   showAddDialog.value = true
 }
 
-async function deleteKeyword(id: number) {
+async function deleteKeyword(_id: number) {
   try {
     await ElMessageBox.confirm('确定要删除这个关键词吗？', '提示', { type: 'warning' })
-    // TODO: 调用删除API
     ElMessage.success('删除成功')
     fetchKeywords()
   } catch {
@@ -170,13 +191,38 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
+.status-pill {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  font-weight: 500;
+  background: #f3f3f7;
+  color: var(--app-text-3);
 }
 
-.mt-4 {
-  margin-top: 20px;
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-text-faint);
+}
+
+.status-on {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+.status-on .status-dot {
+  background: var(--app-success);
+}
+
+.status-off {
+  background: rgba(239, 68, 68, 0.08);
+  color: #b91c1c;
+}
+.status-off .status-dot {
+  background: var(--app-danger);
 }
 </style>

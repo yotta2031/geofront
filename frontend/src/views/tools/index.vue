@@ -1,13 +1,21 @@
 <template>
   <div class="tools-page">
-    <el-row :gutter="20">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">关键词工具</h1>
+        <p class="page-subtitle">指数查询与智能拓词，挖掘长尾流量</p>
+      </div>
+    </header>
+
+    <el-row :gutter="16">
       <el-col :xs="24" :md="12">
-        <el-card shadow="hover">
-          <template #header>
-            <div class="page-card-header">
-              <span>关键词指数查询</span>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">关键词指数查询</h2>
+              <p class="panel-desc">查看关键词热度与竞争度</p>
             </div>
-          </template>
+          </div>
           <el-form :model="zhishuForm" label-width="100px">
             <el-form-item label="关键词">
               <el-input v-model="zhishuForm.keyword" placeholder="请输入关键词">
@@ -20,23 +28,31 @@
             </el-form-item>
           </el-form>
           <div v-if="zhishuResult" class="result-box">
-            <el-descriptions :column="1" border>
-              <el-descriptions-item label="关键词">{{ zhishuResult.keyword }}</el-descriptions-item>
-              <el-descriptions-item label="指数">
-                <el-rate :model-value="zhishuResult.index / 20" disabled show-score />
-              </el-descriptions-item>
-            </el-descriptions>
+            <div class="result-item">
+              <span class="result-label">关键词</span>
+              <span class="result-value">{{ zhishuResult.keyword }}</span>
+            </div>
+            <div class="result-item">
+              <span class="result-label">指数</span>
+              <div class="result-score">
+                <div class="score-bar">
+                  <div class="score-bar-fill" :style="{ width: (zhishuResult.index / 100 * 100) + '%' }"></div>
+                </div>
+                <span class="score-num">{{ zhishuResult.index }}</span>
+              </div>
+            </div>
           </div>
-        </el-card>
+        </section>
       </el-col>
 
-      <el-col :xs="24" :md="12" class="tools-col-second">
-        <el-card shadow="hover">
-          <template #header>
-            <div class="page-card-header">
-              <span>AI拓词</span>
+      <el-col :xs="24" :md="12" class="mt-4 mt-lg-0">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">AI 拓词</h2>
+              <p class="panel-desc">基于语义自动扩展相关词</p>
             </div>
-          </template>
+          </div>
           <el-form :model="tuociForm" label-width="100px">
             <el-form-item label="关键词">
               <el-input v-model="tuociForm.keyword" placeholder="请输入关键词">
@@ -49,61 +65,64 @@
             </el-form-item>
           </el-form>
           <div v-if="tuociResult.length > 0" class="result-box">
-            <el-tag
-              v-for="word in tuociResult"
-              :key="word"
-              class="mr-2 mb-2"
-              type="primary"
-              effect="plain"
-            >
-              {{ word }}
-            </el-tag>
+            <div class="tag-cloud">
+              <el-tag
+                v-for="word in tuociResult"
+                :key="word"
+                class="tag-item"
+                effect="light"
+              >
+                {{ word }}
+              </el-tag>
+            </div>
           </div>
-        </el-card>
+        </section>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20" class="mt-4">
-      <el-col :span="24">
-        <el-card shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <span>手动拓词工具</span>
-            </div>
-          </template>
-          <el-form :model="manualForm" label-width="100px">
-            <el-form-item label="关键词">
-              <el-input v-model="manualForm.keyword" placeholder="请输入关键词" />
-            </el-form-item>
-            <el-form-item label="拓词规则">
-              <el-select v-model="manualForm.rule" placeholder="选择拓词规则">
-                <el-option label="前缀匹配" value="prefix" />
-                <el-option label="后缀匹配" value="suffix" />
-                <el-option label="组合匹配" value="combine" />
-              </el-select>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="manualExpand" :loading="manualLoading">
-                开始拓词
-              </el-button>
-            </el-form-item>
-          </el-form>
-          <div v-if="manualResult.length > 0" class="result-box">
-            <div class="page-table-wrap">
-            <el-table :data="manualResult" style="width: 100%">
-              <el-table-column type="index" width="60" />
-              <el-table-column prop="word" label="拓词结果" />
-              <el-table-column prop="relevance" label="相关度" width="120">
-                <template #default="{ row }">
-                  <el-progress :percentage="row.relevance" :stroke-width="6" />
-                </template>
-              </el-table-column>
-            </el-table>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <section class="panel mt-4">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">手动拓词工具</h2>
+          <p class="panel-desc">自定义规则批量生成关键词组合</p>
+        </div>
+      </div>
+      <el-form :model="manualForm" label-width="100px" class="manual-form">
+        <el-form-item label="关键词">
+          <el-input v-model="manualForm.keyword" placeholder="请输入关键词" />
+        </el-form-item>
+        <el-form-item label="拓词规则">
+          <el-select v-model="manualForm.rule" placeholder="选择拓词规则">
+            <el-option label="前缀匹配" value="prefix" />
+            <el-option label="后缀匹配" value="suffix" />
+            <el-option label="组合匹配" value="combine" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="manualExpand" :loading="manualLoading">
+            开始拓词
+          </el-button>
+        </el-form-item>
+      </el-form>
+      <div v-if="manualResult.length > 0" class="result-box">
+        <div class="page-table-wrap">
+          <el-table :data="manualResult" style="width: 100%">
+            <el-table-column type="index" width="60" label="#" />
+            <el-table-column prop="word" label="拓词结果" min-width="200" />
+            <el-table-column prop="relevance" label="相关度" width="180">
+              <template #default="{ row }">
+                <div class="relevance-cell">
+                  <div class="relevance-bar">
+                    <div class="relevance-bar-fill" :style="{ width: row.relevance + '%' }"></div>
+                  </div>
+                  <span class="relevance-num">{{ row.relevance }}%</span>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -175,32 +194,110 @@ async function manualExpand() {
 </script>
 
 <style scoped>
-.tools-col-second {
-  margin-top: 20px;
-}
-
-@media (min-width: 768px) {
-  .tools-col-second {
-    margin-top: 0;
-  }
-}
-
-.mt-4 {
-  margin-top: 20px;
+.manual-form {
+  max-width: 560px;
 }
 
 .result-box {
   margin-top: 20px;
   padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: #fafafd;
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
 }
 
-.mr-2 {
-  margin-right: 8px;
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--app-divider);
 }
 
-.mb-2 {
-  margin-bottom: 8px;
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-label {
+  font-size: 13px;
+  color: var(--app-text-3);
+}
+
+.result-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-text-1);
+}
+
+.result-score {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 240px;
+}
+
+.score-bar {
+  flex: 1;
+  height: 6px;
+  background: #f3f3f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a375f2);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.score-num {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-1);
+  font-feature-settings: 'tnum';
+  min-width: 32px;
+  text-align: right;
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-item {
+  font-size: 13px;
+}
+
+.relevance-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.relevance-bar {
+  flex: 1;
+  height: 6px;
+  background: #f3f3f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.relevance-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a375f2);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.relevance-num {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--app-text-3);
+  font-feature-settings: 'tnum';
+  min-width: 36px;
+  text-align: right;
 }
 </style>

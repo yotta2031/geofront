@@ -1,60 +1,64 @@
 <template>
   <div class="login-page">
-    <div class="login-box">
-      <div class="login-header">
-        <img src="/favicon.svg" alt="logo" class="logo" />
-        <h2>析探GEO智能优化系统</h2>
-        <p>专业地理定向 SEO优化解决方案</p>
-      </div>
-      
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        class="login-form"
-        @keyup.enter="handleLogin"
-      >
-        <el-form-item prop="username">
-          <el-input
-            v-model="form.username"
-            placeholder="请输入账号"
-            :prefix-icon="User"
-            size="large"
-          />
-        </el-form-item>
-        
-        <el-form-item prop="password">
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="请输入密码"
-            :prefix-icon="Lock"
-            size="large"
-            show-password
-          />
-        </el-form-item>
-        
-        <el-form-item>
-          <el-checkbox v-model="form.remember">记住我</el-checkbox>
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button
-            type="primary"
-            size="large"
-            class="login-btn"
-            :loading="loading"
-            @click="handleLogin"
-          >
-            登录
-          </el-button>
-        </el-form-item>
-      </el-form>
-      
-      <div class="login-footer">
-        <el-link type="primary">用户协议</el-link>
-        <span class="divider">|</span>
-        <span>© 2026 析探GEO</span>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="logo-wrap">
+            <img src="/favicon.svg" alt="logo" class="logo" />
+          </div>
+          <h2 class="login-title">析探 GEO</h2>
+          <p class="login-subtitle">智能优化系统</p>
+        </div>
+
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          class="login-form"
+          @keyup.enter="handleLogin"
+        >
+          <el-form-item prop="username">
+            <el-input
+              v-model="form.username"
+              placeholder="请输入账号"
+              :prefix-icon="User"
+              size="large"
+            />
+          </el-form-item>
+
+          <el-form-item prop="password">
+            <el-input
+              v-model="form.password"
+              type="password"
+              placeholder="请输入密码"
+              :prefix-icon="Lock"
+              size="large"
+              show-password
+            />
+          </el-form-item>
+
+          <el-form-item>
+            <div class="login-options">
+              <el-checkbox v-model="form.remember">记住我</el-checkbox>
+            </div>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button
+              type="primary"
+              size="large"
+              class="login-btn"
+              :loading="loading"
+              @click="handleLogin"
+            >
+              登录
+            </el-button>
+          </el-form-item>
+        </el-form>
+
+        <div class="login-footer">
+          <span>© 2026 析探 GEO</span>
+        </div>
       </div>
     </div>
   </div>
@@ -92,7 +96,7 @@ const rules = {
 async function handleLogin() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
-  
+
   loading.value = true
   try {
     const success = await userStore.loginAction(form.username, form.password)
@@ -115,71 +119,101 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  background: linear-gradient(168deg, #8788ff, #8b5fff, #326eff, #9ca7ff);
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
 }
 
-.login-box {
+.login-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 80%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.login-container {
   width: 100%;
   max-width: 420px;
-  padding: clamp(24px, 5vw, 40px);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
 }
 
-.logo {
-  width: 64px;
-  height: 64px;
+.logo-wrap {
   margin-bottom: 16px;
 }
 
-.login-header h2 {
-  font-size: clamp(18px, 4.5vw, 24px);
-  color: #333;
-  margin-bottom: 8px;
-  line-height: 1.35;
-  word-break: break-word;
+.logo {
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 4px 12px rgba(124, 58, 237, 0.2));
 }
 
-.login-header p {
-  font-size: 14px;
-  color: #666;
+.login-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--app-text-1);
+  letter-spacing: 1px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--app-text-muted);
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
 .login-form {
-  margin-top: 20px;
+  margin-top: 8px;
+}
+
+.login-options {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .login-btn {
   width: 100%;
-  background: linear-gradient(135deg, #4b17d3, #8b5fff);
-  border: none;
-}
-
-.login-btn:hover {
-  background: linear-gradient(135deg, #3a12a8, #7a4de6);
+  height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .login-footer {
-  margin-top: 20px;
+  margin-top: 24px;
   text-align: center;
   font-size: 12px;
-  color: #999;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 4px 8px;
+  color: var(--app-text-muted);
 }
 
-.divider {
-  margin: 0 8px;
+@media (max-width: 480px) {
+  .login-card {
+    padding: 32px 24px;
+  }
+
+  .login-title {
+    font-size: 22px;
+  }
 }
 </style>

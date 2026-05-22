@@ -15,7 +15,7 @@
             circle
             @click="drawerVisible = true"
           />
-          <el-breadcrumb class="breadcrumb">
+          <el-breadcrumb class="breadcrumb" separator="/">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item v-if="currentRoute.meta?.title">
               {{ currentRoute.meta.title }}
@@ -24,15 +24,20 @@
         </div>
         <div class="header-right">
           <div class="header-tags">
-            <el-tag type="warning" effect="plain" size="small">
-              点数: {{ userStore.score }}
-            </el-tag>
-            <el-tag type="success" effect="plain" size="small">
-              余额: ¥{{ userStore.balance }}
-            </el-tag>
+            <span class="header-chip">
+              <span class="chip-dot chip-dot--warn"></span>
+              <span class="chip-label">点数</span>
+              <span class="chip-value">{{ userStore.score }}</span>
+            </span>
+            <span class="header-chip">
+              <span class="chip-dot chip-dot--ok"></span>
+              <span class="chip-label">余额</span>
+              <span class="chip-value">¥{{ userStore.balance }}</span>
+            </span>
           </div>
           <el-dropdown class="user-dropdown">
             <span class="el-dropdown-link">
+              <span class="user-avatar">{{ avatarChar }}</span>
               <span class="user-name">{{ userStore.nickname || userStore.username }}</span>
               <el-icon class="el-icon--right"><arrow-down /></el-icon>
             </span>
@@ -90,6 +95,11 @@ const drawerVisible = ref(false)
 
 const currentRoute = computed(() => route)
 
+const avatarChar = computed(() => {
+  const name = userStore.nickname || userStore.username || ''
+  return name.charAt(0).toUpperCase() || 'U'
+})
+
 watch(() => route.path, () => {
   drawerVisible.value = false
 })
@@ -113,8 +123,8 @@ function handleLogout() {
 }
 
 .sidebar {
-  background: linear-gradient(180deg, #f8f9ff 0%, #f0f2ff 100%);
-  border-right: 1px solid #e4e7ed;
+  background: #fbfbfd;
+  border-right: 1px solid var(--app-border);
   flex-shrink: 0;
 }
 
@@ -129,16 +139,15 @@ function handleLogout() {
   justify-content: space-between;
   gap: 12px;
   background: #fff;
-  border-bottom: 1px solid #e4e7ed;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  padding: 0 16px;
+  border-bottom: 1px solid var(--app-border);
+  padding: 0 20px;
   height: 56px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   min-width: 0;
   flex: 1;
 }
@@ -150,12 +159,23 @@ function handleLogout() {
 .breadcrumb {
   min-width: 0;
   overflow: hidden;
+  font-size: 13px;
+}
+
+.breadcrumb :deep(.el-breadcrumb__inner) {
+  color: var(--app-text-3);
+  font-weight: 400;
+}
+
+.breadcrumb :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+  color: var(--app-text-1);
+  font-weight: 500;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
   flex-shrink: 0;
 }
 
@@ -165,6 +185,45 @@ function handleLogout() {
   gap: 8px;
 }
 
+.header-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  font-size: 12px;
+  background: #fff;
+  color: var(--app-text-3);
+}
+
+.chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.chip-dot--warn {
+  background: var(--app-warning);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.chip-dot--ok {
+  background: var(--app-success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.chip-label {
+  color: var(--app-text-muted);
+}
+
+.chip-value {
+  color: var(--app-text-1);
+  font-weight: 500;
+  font-feature-settings: 'tnum';
+}
+
 .user-dropdown {
   cursor: pointer;
 }
@@ -172,9 +231,23 @@ function handleLogout() {
 .el-dropdown-link {
   display: flex;
   align-items: center;
-  gap: 4px;
-  color: #606266;
-  font-size: 14px;
+  gap: 8px;
+  color: var(--app-text-2);
+  font-size: 13px;
+  outline: none;
+}
+
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7c3aed, #a375f2);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .user-name {
@@ -182,21 +255,27 @@ function handleLogout() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
+  color: var(--app-text-1);
 }
 
 .main-content {
-  background: #f6f6f6;
-  padding: 16px;
+  background: var(--app-bg);
+  padding: 20px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.fade-enter-from,
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
 .fade-leave-to {
   opacity: 0;
 }
@@ -215,11 +294,11 @@ function handleLogout() {
   }
 
   .main-content {
-    padding: 12px;
+    padding: 14px;
   }
 
   :deep(.el-breadcrumb) {
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 

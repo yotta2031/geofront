@@ -5,8 +5,30 @@
   --el-color-primary-light-5: #be9df6;
   --el-color-primary-light-7: #d8c4fa;
   --el-color-primary-light-8: #e5d8fb;
-  --el-color-primary-light-9: #f2ebfd;
+  --el-color-primary-light-9: #f5f0fe;
   --el-color-primary-dark-2: #632ebe;
+
+  /* 设计 token */
+  --app-bg: #f7f7f9;
+  --app-surface: #ffffff;
+  --app-border: #ececf2;
+  --app-border-strong: #d8c4fa;
+  --app-divider: #f3f3f7;
+  --app-text-1: #1f2024;
+  --app-text-2: #4b4f57;
+  --app-text-3: #6b6f76;
+  --app-text-muted: #9aa0a6;
+  --app-text-faint: #c4c8cf;
+  --app-shadow-sm: 0 1px 2px rgba(20, 14, 56, 0.04);
+  --app-shadow-md: 0 8px 24px rgba(124, 58, 237, 0.08);
+  --app-radius: 12px;
+  --app-radius-sm: 8px;
+  --app-radius-lg: 16px;
+
+  --app-success: #10b981;
+  --app-warning: #f59e0b;
+  --app-danger: #ef4444;
+  --app-info: #6b7280;
 }
 
 /* 全局基础 */
@@ -41,12 +63,94 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #303133;
-  background: #f6f6f6;
+  color: var(--app-text-1);
+  background: var(--app-bg);
   overflow-x: hidden;
 }
 
-/* 页面通用 */
+/* ============== 通用页面样式 ============== */
+
+/* 页面标题 */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+  color: var(--app-text-1);
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--app-text-muted);
+  margin: 6px 0 0;
+}
+
+/* 面板容器 */
+.panel {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 18px 20px;
+}
+
+.panel + .panel {
+  margin-top: 16px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--app-text-1);
+}
+
+.panel-desc {
+  font-size: 12px;
+  color: var(--app-text-muted);
+  margin: 4px 0 0;
+}
+
+.panel-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 通用工具间距 */
+.mt-4 {
+  margin-top: 16px;
+}
+
+.mt-6 {
+  margin-top: 20px;
+}
+
+@media (min-width: 992px) {
+  .mt-lg-0 {
+    margin-top: 0 !important;
+  }
+}
+
+/* 旧的 page-card-header 兼容（仅样式简化） */
 .page-card-header {
   display: flex;
   flex-wrap: wrap;
@@ -61,6 +165,50 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ============== Element Plus 样式微调 ============== */
+
+/* 卡片：统一为细边框 + 极浅阴影 */
+.el-card {
+  border: 1px solid var(--app-border) !important;
+  border-radius: var(--app-radius) !important;
+  box-shadow: none !important;
+}
+
+.el-card.is-hover-shadow:hover,
+.el-card.is-always-shadow:hover {
+  box-shadow: var(--app-shadow-md) !important;
+  border-color: var(--app-border-strong) !important;
+}
+
+.el-card__header {
+  padding: 14px 20px !important;
+  border-bottom: 1px solid var(--app-border) !important;
+  font-weight: 600;
+  color: var(--app-text-1);
+}
+
+.el-card__body {
+  padding: 18px 20px !important;
+}
+
+/* 表格 */
+.el-table {
+  --el-table-border-color: var(--app-border);
+  --el-table-header-bg-color: #fafafd;
+  --el-table-header-text-color: var(--app-text-3);
+  --el-table-row-hover-bg-color: #fafafd;
+  font-size: 13px;
+}
+
+.el-table th.el-table__cell {
+  font-weight: 500;
+}
+
+.el-table td.el-table__cell,
+.el-table th.el-table__cell.is-leaf {
+  border-bottom: 1px solid var(--app-divider) !important;
+}
+
 /* 主内容区：卡片与表格在小屏可横向滚动 */
 .main-content .el-card__body {
   overflow-x: auto;
@@ -70,11 +218,149 @@ body {
   min-width: 600px;
 }
 
-/* 分页器换行 */
+/* 按钮：去高饱和阴影、紧凑圆角 */
+.el-button {
+  border-radius: 8px !important;
+  font-weight: 500;
+}
+
+.el-button--primary {
+  box-shadow: 0 1px 2px rgba(124, 58, 237, 0.18);
+}
+
+.el-button.is-link {
+  font-weight: 500;
+}
+
+/* Tag 简化 */
+.el-tag {
+  border-radius: 6px !important;
+  font-weight: 500;
+  border: none !important;
+}
+
+.el-tag--small {
+  height: 22px;
+  padding: 0 8px;
+}
+
+/* 输入框 */
+.el-input__wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 1px var(--app-border) inset !important;
+  transition: box-shadow 0.2s ease;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px var(--app-border-strong) inset !important;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;
+}
+
+.el-textarea__inner {
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 1px var(--app-border) inset !important;
+}
+
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;
+}
+
+/* Select */
+.el-select__wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 1px var(--app-border) inset !important;
+}
+
+.el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;
+}
+
+/* 单选按钮组 */
+.el-radio-button__inner {
+  border-color: var(--app-border) !important;
+}
+
+/* 分页 */
 .el-pagination {
   flex-wrap: wrap;
   row-gap: 8px;
   justify-content: flex-end;
+  font-weight: 500;
+}
+
+.el-pagination .btn-prev,
+.el-pagination .btn-next,
+.el-pagination .el-pager li {
+  border-radius: 6px !important;
+  background: transparent !important;
+}
+
+/* Dialog */
+.el-dialog {
+  border-radius: var(--app-radius-lg) !important;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  padding: 18px 24px !important;
+  margin-right: 0 !important;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.el-dialog__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-text-1);
+}
+
+.el-dialog__body {
+  padding: 22px 24px !important;
+}
+
+.el-dialog__footer {
+  padding: 14px 24px !important;
+  border-top: 1px solid var(--app-border);
+}
+
+/* Drawer */
+.el-drawer__header {
+  padding: 18px 24px !important;
+  margin-bottom: 0 !important;
+  border-bottom: 1px solid var(--app-border);
+}
+
+/* Steps */
+.el-steps {
+  padding: 8px 0 4px;
+}
+
+.el-step__title {
+  font-size: 13px !important;
+}
+
+/* Descriptions */
+.el-descriptions__label {
+  background: #fafafd !important;
+  color: var(--app-text-3) !important;
+  font-weight: 500 !important;
+}
+
+/* Empty */
+.el-empty {
+  padding: 60px 0 !important;
+}
+
+.el-empty__description p {
+  color: var(--app-text-muted);
+}
+
+/* Switch */
+.el-switch.is-checked .el-switch__core {
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
 }
 
 /* 表单小屏标签置顶 */

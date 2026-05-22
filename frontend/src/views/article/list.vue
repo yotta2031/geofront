@@ -1,47 +1,59 @@
 <template>
   <div class="article-list-page">
-    <el-card shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>文章列表</span>
-          <div>
-            <el-input
-              v-model="searchKeyword"
-              placeholder="搜索文章标题"
-              style="width: 200px; margin-right: 10px;"
-              clearable
-            />
-            <el-button type="primary" @click="fetchArticles">
-              <el-icon><Search /></el-icon>搜索
-            </el-button>
-          </div>
-        </div>
-      </template>
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">文章列表</h1>
+        <p class="page-subtitle">管理已生成的文章，支持搜索、查看与编辑</p>
+      </div>
+    </header>
 
-      <el-table :data="articles" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="title" label="标题" min-width="200" />
-        <el-table-column prop="articleTypeId" label="分类" width="120">
-          <template #default="{ row }">
-            <el-tag size="small">{{ row.articleTypeId }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" size="small">
-              {{ getStatusText(row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="180" />
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="viewArticle(row)">查看</el-button>
-            <el-button link @click="editArticle(row)">编辑</el-button>
-            <el-button type="danger" link @click="deleteArticle(row.id)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">全部文章</h2>
+          <p class="panel-desc">共 {{ total }} 篇</p>
+        </div>
+        <div class="panel-toolbar">
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索文章标题"
+            :prefix-icon="Search"
+            clearable
+            class="search-input"
+            @keyup.enter="fetchArticles"
+            @clear="fetchArticles"
+          />
+          <el-button type="primary" @click="fetchArticles">搜索</el-button>
+        </div>
+      </div>
+
+      <div class="page-table-wrap">
+        <el-table :data="articles" style="width: 100%" v-loading="loading">
+          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column prop="title" label="标题" min-width="220" />
+          <el-table-column prop="articleTypeId" label="分类" width="120">
+            <template #default="{ row }">
+              <el-tag size="small" effect="light">{{ row.articleTypeId }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100">
+            <template #default="{ row }">
+              <span class="status-pill" :class="`status-${row.status}`">
+                <span class="status-dot"></span>
+                {{ getStatusText(row.status) }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="创建时间" width="180" />
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="viewArticle(row)">查看</el-button>
+              <el-button link @click="editArticle(row)">编辑</el-button>
+              <el-button type="danger" link @click="deleteArticle(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <el-pagination
         class="mt-4"
@@ -53,15 +65,17 @@
         @size-change="fetchArticles"
         @current-change="fetchArticles"
       />
-    </el-card>
+    </section>
 
-    <!-- 文章详情弹窗 -->
     <el-dialog v-model="showDetailDialog" title="文章详情" width="800px">
       <div v-if="currentArticle" class="article-detail">
-        <h2>{{ currentArticle.title }}</h2>
+        <h2 class="article-title">{{ currentArticle.title }}</h2>
         <div class="article-meta">
-          <el-tag size="small">{{ getStatusText(currentArticle.status) }}</el-tag>
-          <span>{{ currentArticle.createdAt }}</span>
+          <span class="status-pill" :class="`status-${currentArticle.status}`">
+            <span class="status-dot"></span>
+            {{ getStatusText(currentArticle.status) }}
+          </span>
+          <span class="article-time">{{ currentArticle.createdAt }}</span>
         </div>
         <div class="article-content" v-html="currentArticle.content"></div>
       </div>
@@ -83,15 +97,6 @@ const total = ref(0)
 const searchKeyword = ref('')
 const showDetailDialog = ref(false)
 const currentArticle = ref<any>(null)
-
-function getStatusType(status: string) {
-  const map: Record<string, string> = {
-    draft: 'info',
-    published: 'success',
-    archived: ''
-  }
-  return map[status] || 'info'
-}
 
 function getStatusText(status: string) {
   const map: Record<string, string> = {
@@ -115,14 +120,12 @@ async function viewArticle(row: any) {
 }
 
 function editArticle(row: any) {
-  // TODO: 跳转到编辑页面或打开编辑弹窗
   ElMessage.info('编辑文章: ' + row.id)
 }
 
-async function deleteArticle(id: number) {
+async function deleteArticle(_id: number) {
   try {
     await ElMessageBox.confirm('确定要删除这篇文章吗？', '提示', { type: 'warning' })
-    // TODO: 调用删除API
     ElMessage.success('删除成功')
     fetchArticles()
   } catch {
@@ -153,30 +156,86 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
+.search-input {
+  width: 240px;
+}
+
+.status-pill {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: #f3f3f7;
+  color: var(--app-text-3);
+  font-weight: 500;
 }
 
-.mt-4 {
-  margin-top: 20px;
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-text-faint);
 }
 
-.article-detail h2 {
-  margin-bottom: 16px;
+.status-published {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+.status-published .status-dot {
+  background: var(--app-success);
+}
+
+.status-draft {
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--el-color-primary);
+}
+.status-draft .status-dot {
+  background: var(--el-color-primary);
+}
+
+.status-archived {
+  background: #f3f3f7;
+  color: var(--app-text-3);
+}
+
+.article-detail {
+  padding: 4px 0;
+}
+
+.article-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--app-text-1);
 }
 
 .article-meta {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
-  color: #999;
-  font-size: 14px;
+}
+
+.article-time {
+  color: var(--app-text-muted);
+  font-size: 12px;
 }
 
 .article-content {
   line-height: 1.8;
-  color: #333;
+  color: var(--app-text-2);
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    width: 100%;
+  }
+
+  .panel-toolbar {
+    width: 100%;
+  }
 }
 </style>

@@ -1,34 +1,43 @@
 <template>
   <div class="types-page">
-    <el-card shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>文章分类</span>
-          <el-button type="primary" @click="showAddDialog = true">
-            <el-icon><Plus /></el-icon>创建分类
-          </el-button>
-        </div>
-      </template>
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">文章分类</h1>
+        <p class="page-subtitle">管理文章分类标签，便于内容归类与生成</p>
+      </div>
+      <el-button type="primary" :icon="Plus" @click="openCreate">创建分类</el-button>
+    </header>
 
-      <el-table :data="types" style="width: 100%" v-loading="loading">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="分类名称" />
-        <el-table-column prop="description" label="描述" />
-        <el-table-column prop="status" label="状态" width="80">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
-              {{ row.status === 1 ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="180" />
-        <el-table-column label="操作" width="150" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="editType(row)">编辑</el-button>
-            <el-button type="danger" link @click="deleteType(row.id)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">分类列表</h2>
+          <p class="panel-desc">共 {{ total }} 个分类</p>
+        </div>
+      </div>
+
+      <div class="page-table-wrap">
+        <el-table :data="types" style="width: 100%" v-loading="loading">
+          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column prop="name" label="分类名称" min-width="140" />
+          <el-table-column prop="description" label="描述" min-width="200" />
+          <el-table-column prop="status" label="状态" width="90">
+            <template #default="{ row }">
+              <span class="status-pill" :class="row.status === 1 ? 'status-on' : 'status-off'">
+                <span class="status-dot"></span>
+                {{ row.status === 1 ? '启用' : '禁用' }}
+              </span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="创建时间" width="180" />
+          <el-table-column label="操作" width="140" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="editType(row)">编辑</el-button>
+              <el-button type="danger" link @click="deleteType(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <el-pagination
         class="mt-4"
@@ -40,9 +49,8 @@
         @size-change="fetchTypes"
         @current-change="fetchTypes"
       />
-    </el-card>
+    </section>
 
-    <!-- 添加/编辑弹窗 -->
     <el-dialog v-model="showAddDialog" :title="editingId ? '编辑分类' : '创建分类'" width="500px">
       <el-form :model="form" label-width="100px">
         <el-form-item label="分类名称">
@@ -86,6 +94,11 @@ function resetForm() {
   editingId.value = null
 }
 
+function openCreate() {
+  resetForm()
+  showAddDialog.value = true
+}
+
 function editType(row: any) {
   editingId.value = row.id
   form.name = row.name
@@ -93,10 +106,9 @@ function editType(row: any) {
   showAddDialog.value = true
 }
 
-async function deleteType(id: number) {
+async function deleteType(_id: number) {
   try {
     await ElMessageBox.confirm('确定要删除这个分类吗？', '提示', { type: 'warning' })
-    // TODO: 调用删除API
     ElMessage.success('删除成功')
     fetchTypes()
   } catch {
@@ -143,13 +155,38 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
+.status-pill {
+  display: inline-flex;
   align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  font-size: 12px;
+  border-radius: 999px;
+  font-weight: 500;
+  background: #f3f3f7;
+  color: var(--app-text-3);
 }
 
-.mt-4 {
-  margin-top: 20px;
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-text-faint);
+}
+
+.status-on {
+  background: rgba(16, 185, 129, 0.1);
+  color: #047857;
+}
+.status-on .status-dot {
+  background: var(--app-success);
+}
+
+.status-off {
+  background: rgba(239, 68, 68, 0.08);
+  color: #b91c1c;
+}
+.status-off .status-dot {
+  background: var(--app-danger);
 }
 </style>
