@@ -1,11 +1,12 @@
 import type { Context, Next } from "hono";
 import { jwtVerify } from "jose";
+import type { AppEnv, AuthUser } from "../types.js";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "your-jwt-secret-key-change-in-production"
 );
 
-export async function authMiddleware(c: Context, next: Next) {
+export async function authMiddleware(c: Context<AppEnv>, next: Next) {
   const authHeader = c.req.header("Authorization");
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -19,8 +20,10 @@ export async function authMiddleware(c: Context, next: Next) {
       clockTolerance: 60,
     });
     
-    // 将用户信息附加到上下文
-    c.set("user", payload);
+    c.set("user", {
+      userId: Number(payload.userId),
+      username: String(payload.username),
+    } satisfies AuthUser);
     return await next();
   } catch {
     return c.json({ code: 0, msg: "认证令牌无效或已过期" }, 401);

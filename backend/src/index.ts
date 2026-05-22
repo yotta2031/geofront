@@ -15,6 +15,7 @@ import { publishRoutes } from "./routes/publish.js";
 import { toolRoutes } from "./routes/tool.js";
 import { errorHandler } from "./middleware/error.js";
 import { authMiddleware } from "./middleware/auth.js";
+import type { AppEnv } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -25,7 +26,7 @@ const isProd = process.env.NODE_ENV === "production";
 const staticRoot =
   process.env.STATIC_DIR || join(__dirname, "../../public");
 
-const app = new Hono();
+const app = new Hono<AppEnv>();
 
 // 全局中间件
 const corsOrigin = process.env.FRONTEND_URL || (isProd ? "*" : "http://localhost:5173");

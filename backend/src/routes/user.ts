@@ -1,30 +1,61 @@
 import { Hono } from "hono";
+import { eq } from "drizzle-orm";
+import { db } from "../db/index.js";
+import { users } from "../db/schema.js";
+import type { AppEnv } from "../types.js";
 
-export const userRoutes = new Hono();
+export const userRoutes = new Hono<AppEnv>();
 
 // 获取当前用户信息
 userRoutes.get("/me", async (c) => {
-  // TODO: 从token解析用户ID，查询用户信息
-  return c.json({
-    code: 1,
-    data: {
-      id: 1,
-      username: "admin",
-      nickname: "管理员",
-      avatar: null,
-      score: 390,
-      balance: 0.50,
-      storage_used: 304,
-      storage_total: 1000,
-      vip_expire: "2027-01-15",
-    },
-  });
+  const userId = c.get("user").userId;
+
+  if (!userId) {
+    return c.json({ code: 0, msg: "未登录" }, 401);
+  }
+
+  const [user] = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      nickname: users.nickname,
+      avatar: users.avatar,
+      score: users.score,
+      balance: users.balance,
+      storage_used: users.storageUsed,
+      storage_total: users.storageTotal,
+      vip_expire: users.vipExpire,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user) {
+    return c.json({ code: 0, msg: "用户不存在" }, 404);
+  }
+
+  return c.json({ code: 1, data: user });
 });
 
 // 更新用户信息
 userRoutes.put("/me", async (c) => {
+  const userId = c.get("user").userId;
+
+  if (!userId) {
+    return c.json({ code: 0, msg: "未登录" }, 401);
+  }
+
   const body = await c.req.json();
-  // TODO: 更新用户信息
+  await db
+    .update(users)
+    .set({
+      nickname: body.nickname,
+      email: body.email,
+      phone: body.phone,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId));
+
   return c.json({ code: 1, msg: "更新成功", data: null });
 });
 
