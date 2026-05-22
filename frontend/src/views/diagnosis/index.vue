@@ -178,6 +178,7 @@ import gptLogo from '@/assets/logo/gpt.png'
 import kimiLogo from '@/assets/logo/kimi.png'
 import yuanbaoLogo from '@/assets/logo/yuanbao.png'
 import doubao from '@/assets/logo/doubao.png'
+import qianwen from '@/assets/logo/qianwen.png';
 
 const platforms = [
   { value: 'deepseek', label: 'DeepSeek', logo: deepseekLogo },
@@ -185,7 +186,8 @@ const platforms = [
   { value: 'gpt', label: 'GPT', logo: gptLogo },
   { value: 'kimi', label: 'Kimi', logo: kimiLogo },
   { value: 'yuanbao', label: '元宝', logo: yuanbaoLogo },
-  {valude: 'doubao', label: '豆包' ,logo: doubao}
+  {valude: 'doubao', label: '豆包' ,logo: doubao},
+  {valude: 'qianwen', label: '千问', logo: qianwen}
 ]
 
 const form = reactive({
