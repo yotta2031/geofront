@@ -1,10 +1,10 @@
 <template>
   <div class="tools-page">
     <el-row :gutter="20">
-      <el-col :span="12">
+      <el-col :xs="24" :md="12">
         <el-card shadow="hover">
           <template #header>
-            <div class="card-header">
+            <div class="page-card-header">
               <span>关键词指数查询</span>
             </div>
           </template>
@@ -30,10 +30,10 @@
         </el-card>
       </el-col>
 
-      <el-col :span="12">
+      <el-col :xs="24" :md="12" class="tools-col-second">
         <el-card shadow="hover">
           <template #header>
-            <div class="card-header">
+            <div class="page-card-header">
               <span>AI拓词</span>
             </div>
           </template>
@@ -89,6 +89,7 @@
             </el-form-item>
           </el-form>
           <div v-if="manualResult.length > 0" class="result-box">
+            <div class="page-table-wrap">
             <el-table :data="manualResult" style="width: 100%">
               <el-table-column type="index" width="60" />
               <el-table-column prop="word" label="拓词结果" />
@@ -98,6 +99,7 @@
                 </template>
               </el-table-column>
             </el-table>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -173,10 +175,14 @@ async function manualExpand() {
 </script>
 
 <style scoped>
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.tools-col-second {
+  margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+  .tools-col-second {
+    margin-top: 0;
+  }
 }
 
 .mt-4 {

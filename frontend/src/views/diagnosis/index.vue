@@ -7,7 +7,7 @@
         </div>
       </template>
 
-      <el-form :model="form" label-width="120px" class="diagnosis-form">
+      <el-form :model="form" :label-width="formLabelWidth" class="diagnosis-form responsive-form">
         <el-form-item label="选择AI平台">
           <el-checkbox-group v-model="form.platforms">
             <el-checkbox label="deepseek">DeepSeek</el-checkbox>
@@ -70,6 +70,7 @@
           </el-button>
         </div>
       </template>
+      <div class="page-table-wrap">
       <el-table :data="reports" style="width: 100%">
         <el-table-column prop="brand" label="品牌" />
         <el-table-column prop="platforms" label="平台">
@@ -95,15 +96,19 @@
           </template>
         </el-table-column>
       </el-table>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { createDiagnosis, getDiagnosisList } from '@/api/diagnosis'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 
+const { isMobile } = useBreakpoint()
+const formLabelWidth = computed(() => (isMobile.value ? 'auto' : '120px'))
 const loading = ref(false)
 const reports = ref([])
 

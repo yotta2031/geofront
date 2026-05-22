@@ -1,0 +1,727 @@
+
+# 二、技术栈（固定，不允许替换）
+
+# Frontend
+
+```yaml
+framework: Next.js 15
+language: TypeScript
+ui: TailwindCSS + shadcn/ui
+state: Zustand
+query: TanStack Query
+chart: Apache ECharts
+pdf: react-pdf
+form: react-hook-form
+validation: zod
+```
+
+---
+
+# Backend
+
+```yaml
+framework: FastAPI
+language: Python 3.12
+orm: SQLAlchemy 2
+validation: Pydantic v2
+queue: Temporal
+cache: Redis
+vector: Milvus
+analytics: ClickHouse
+db: PostgreSQL
+gateway: LiteLLM
+monitoring: Langfuse + Prometheus
+```
+
+---
+
+# Infra
+
+```yaml
+container: Docker
+orchestration: Kubernetes
+proxy: Nginx
+ci: GitHub Actions
+storage: MinIO
+```
+
+---
+
+# 三、项目目录结构（必须按此生成）
+
+# frontend
+
+```plaintext
+frontend/
+ ├── app/
+ │   ├── dashboard/
+ │   ├── diagnose/
+ │   ├── reports/
+ │   ├── brands/
+ │   ├── billing/
+ │   └── api/
+ ├── components/
+ │   ├── charts/
+ │   ├── report/
+ │   ├── forms/
+ │   ├── shared/
+ ├── store/
+ ├── hooks/
+ ├── services/
+ ├── types/
+ └── lib/
+```
+
+---
+
+# backend
+
+```plaintext
+backend/
+ ├── app/
+ │   ├── api/
+ │   ├── core/
+ │   ├── db/
+ │   ├── models/
+ │   ├── schemas/
+ │   ├── services/
+ │   ├── workers/
+ │   ├── llm/
+ │   ├── geo/
+ │   ├── reports/
+ │   └── analytics/
+ ├── temporal/
+ ├── tests/
+ └── scripts/
+```
+
+---
+
+# 四、数据库设计（直接建表）
+
+# 1 brands
+
+```sql
+CREATE TABLE brands (
+ id UUID PRIMARY KEY,
+ name VARCHAR(255),
+ aliases JSONB,
+ industry VARCHAR(255),
+ website TEXT,
+ description TEXT,
+ created_at TIMESTAMP
+);
+```
+
+---
+
+# 2 geo_tasks
+
+```sql
+CREATE TABLE geo_tasks (
+ id UUID PRIMARY KEY,
+ brand_id UUID,
+ status VARCHAR(30),
+ progress INT,
+ score FLOAT,
+ created_at TIMESTAMP
+);
+```
+
+状态：
+
+```plaintext
+queued
+running
+analyzing
+reporting
+completed
+failed
+```
+
+---
+
+# 3 llm_responses
+
+```sql
+CREATE TABLE llm_responses (
+ id UUID PRIMARY KEY,
+ task_id UUID,
+ provider VARCHAR(50),
+ query TEXT,
+ response TEXT,
+ latency_ms INT,
+ tokens INT,
+ created_at TIMESTAMP
+);
+```
+
+---
+
+# 4 visibility_scores
+
+```sql
+CREATE TABLE visibility_scores (
+ id UUID PRIMARY KEY,
+ task_id UUID,
+ provider VARCHAR(50),
+ mention_rate FLOAT,
+ positive_rate FLOAT,
+ rank_score FLOAT,
+ sentiment_score FLOAT
+);
+```
+
+---
+
+# 5 competitors
+
+```sql
+CREATE TABLE competitors (
+ id UUID PRIMARY KEY,
+ task_id UUID,
+ name VARCHAR(255),
+ score FLOAT
+);
+```
+
+---
+
+# 6 reports
+
+```sql
+CREATE TABLE reports (
+ id UUID PRIMARY KEY,
+ task_id UUID,
+ html_url TEXT,
+ pdf_url TEXT,
+ created_at TIMESTAMP
+);
+```
+
+---
+
+# 五、API设计（完整）
+
+# Diagnose
+
+## create task
+
+```http
+POST /api/v1/diagnose
+```
+
+body:
+
+```json
+{
+  "brand":"菜洋洋",
+  "aliases":["cyy"],
+  "industry":"生鲜B2B",
+  "generate_suggestion":true
+}
+```
+
+response:
+
+```json
+{
+  "task_id":"uuid"
+}
+```
+
+---
+
+## task status
+
+```http
+GET /api/v1/tasks/{id}
+```
+
+---
+
+## task detail
+
+```http
+GET /api/v1/tasks/{id}/result
+```
+
+---
+
+## report
+
+```http
+GET /api/v1/reports/{id}
+```
+
+---
+
+# Brands
+
+## create
+
+```http
+POST /api/v1/brands
+```
+
+## list
+
+```http
+GET /api/v1/brands
+```
+
+---
+
+# Billing
+
+```http
+POST /api/v1/pay
+```
+
+---
+
+# 六、LLM Provider Adapter
+
+统一接口：
+
+```python
+class BaseProvider:
+    async def complete(self,prompt:str)->str:
+        pass
+```
+
+实现：
+
+```plaintext
+DeepSeekProvider
+DoubaoProvider
+KimiProvider
+TongyiProvider
+WenxinProvider
+ZhipuProvider
+YuanbaoProvider
+NamiProvider
+```
+
+全部走 LiteLLM。
+
+配置：
+
+```yaml
+providers:
+ deepseek:
+   model: deepseek-chat
+ kimi:
+   model: moonshot-v1-128k
+ zhipu:
+   model: glm-4
+ tongyi:
+   model: qwen-max
+```
+
+---
+
+# 七、Query Generator
+
+路径：
+
+```plaintext
+backend/app/geo/query_generator.py
+```
+
+职责：
+
+输入：
+
+```json
+{
+ "brand":"菜洋洋",
+ "industry":"生鲜B2B"
+}
+```
+
+输出：
+
+```python
+[
+ "生鲜B2B平台推荐",
+ "食材供应链平台哪个好",
+ "华东生鲜配送服务商推荐"
+]
+```
+
+生成逻辑：
+
+## Intent types
+
+```python
+[
+ "recommendation",
+ "comparison",
+ "authority",
+ "solution",
+ "trust"
+]
+```
+
+每类生成：
+
+```plaintext
+20条
+```
+
+总：
+
+```plaintext
+100条
+```
+
+---
+
+# 八、多模型并发调度
+
+路径：
+
+```plaintext
+backend/app/workers/diagnose_worker.py
+```
+
+逻辑：
+
+```python
+asyncio.gather(*tasks)
+```
+
+超时：
+
+```python
+30s
+```
+
+retry:
+
+```python
+3次
+```
+
+fallback:
+
+```python
+自动切备用provider
+```
+
+---
+
+# 九、NLP评分引擎
+
+路径：
+
+```plaintext
+backend/app/geo/scorer.py
+```
+
+评分：
+
+```python
+final_score = (
+ mention_rate * 35
+ + recommendation_rate * 25
+ + rank_weight * 20
+ + sentiment * 10
+ + stability * 10
+)
+```
+
+---
+
+# 十、NER识别
+
+模型：
+
+```plaintext
+bge-m3
+```
+
+任务：
+
+识别：
+
+```plaintext
+品牌
+竞品
+行业词
+场景词
+```
+
+输出：
+
+```json
+{
+ "mentioned":true,
+ "rank":2,
+ "competitors":["美菜","蜀海"]
+}
+```
+
+---
+
+# 十一、建议生成器
+
+路径：
+
+```plaintext
+backend/app/geo/suggester.py
+```
+
+规则：
+
+if
+
+```python
+mention_rate < 20
+```
+
+输出：
+
+```plaintext
+增加权威媒体曝光
+```
+
+if
+
+```python
+competitor_rate > self_rate
+```
+
+输出：
+
+```plaintext
+强化差异化品牌叙事
+```
+
+LLM润色。
+
+---
+
+# 十二、报告生成
+
+模板：
+
+```plaintext
+Jinja2 + HTML
+```
+
+输出：
+
+```plaintext
+/report/{task_id}.html
+/report/{task_id}.pdf
+```
+
+模块：
+
+## 概览
+
+* 品牌
+* 产品
+* 行业
+* 综合评级
+
+---
+
+## GEO评分
+
+圆环图
+
+---
+
+## 各模型表现
+
+8平台矩阵
+
+---
+
+## 竞品对比
+
+横向柱状图
+
+---
+
+## 优化建议
+
+卡片流
+
+---
+
+## 品牌语义地图
+
+关系图谱
+
+---
+
+# 十三、实时任务进度
+
+WebSocket:
+
+```http
+/ws/tasks/{id}
+```
+
+推送：
+
+```json
+{
+ "progress":68,
+ "status":"analyzing"
+}
+```
+
+---
+
+# 十四、权限系统
+
+角色：
+
+```plaintext
+super_admin
+operator
+sales
+client
+agent
+```
+
+JWT auth。
+
+---
+
+# 十五、前端页面
+
+# /diagnose
+
+输入：
+
+* 品牌
+* 行业
+* 优化建议开关
+* provider选择
+
+按钮：
+
+```plaintext
+创建AI诊断任务
+```
+
+---
+
+# /dashboard
+
+展示：
+
+* 今日任务
+* 平均GEO评分
+* token成本
+* 模型成功率
+
+---
+
+# /reports/[id]
+
+完整报告页（参考你上传那个 HTML）
+
+---
+
+# 十六、环境变量
+
+backend
+
+```env
+DATABASE_URL=
+REDIS_URL=
+CLICKHOUSE_URL=
+MILVUS_URL=
+LANGFUSE_SECRET=
+OPENAI_API_KEY=
+DEEPSEEK_API_KEY=
+KIMI_API_KEY=
+ZHIPU_API_KEY=
+QWEN_API_KEY=
+```
+
+frontend
+
+```env
+NEXT_PUBLIC_API_URL=
+```
+
+---
+
+# 十七、Docker
+
+backend
+
+```dockerfile
+FROM python:3.12
+WORKDIR /app
+COPY .
+RUN pip install -r requirements.txt
+CMD ["uvicorn","main:app"]
+```
+
+frontend
+
+```dockerfile
+FROM node:22
+RUN npm install
+RUN npm run build
+CMD ["npm","start"]
+```
+
+---
+
+# 十八、启动命令
+
+backend
+
+```bash
+uvicorn app.main:app --reload
+```
+
+frontend
+
+```bash
+npm run dev
+```
+
+worker
+
+```bash
+python temporal/worker.py
+```
+
+---
+
+# 十九、生成代码时要求（直接给 AI Coding）
+
+把这段贴进去：
+
+```plaintext
+请严格按照规格生成完整工程：
+
+要求：
+1. 所有代码可运行
+2. 不允许省略实现
+3. 不允许mock
+4. 所有API完整
+5. 所有DB migration生成
+6. 所有页面完整
+7. 所有图表完整
+8. docker compose可一键启动
+9. Temporal workflow完整
+10. 生成README部署文档
+```
+
+---
+
+这份规格直接扔给 Cursor / Claude Code。
+
+它会直接生成一个 **完整可运行 GEO SaaS 平台**。

@@ -1,6 +1,6 @@
 # Geo CRM System
 
-YQGK GEO智能优化系统 - 现代技术栈重构版
+析探GEO智能优化系统 - 现代技术栈重构版
 
 ## 技术栈
 
@@ -80,5 +80,3 @@ cd backend && npm run dev
   "data": {}        // 响应数据
 }
 ```
-# geofront
-# geofront

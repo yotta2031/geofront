@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="login-header">
         <img src="/favicon.svg" alt="logo" class="logo" />
-        <h2>灵雯GEO智能优化系统</h2>
+        <h2>析探GEO智能优化系统</h2>
         <p>专业地理定向 SEO优化解决方案</p>
       </div>
       
@@ -54,7 +54,7 @@
       <div class="login-footer">
         <el-link type="primary">用户协议</el-link>
         <span class="divider">|</span>
-        <span>© 2026 灵雯GEO</span>
+        <span>© 2026 析探GEO</span>
       </div>
     </div>
   </div>
@@ -110,16 +110,19 @@ async function handleLogin() {
 
 <style scoped>
 .login-page {
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
   background: linear-gradient(168deg, #8788ff, #8b5fff, #326eff, #9ca7ff);
 }
 
 .login-box {
-  width: 420px;
-  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  padding: clamp(24px, 5vw, 40px);
   background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   backdrop-filter: blur(10px);
@@ -138,9 +141,11 @@ async function handleLogin() {
 }
 
 .login-header h2 {
-  font-size: 24px;
+  font-size: clamp(18px, 4.5vw, 24px);
   color: #333;
   margin-bottom: 8px;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .login-header p {
@@ -167,6 +172,11 @@ async function handleLogin() {
   text-align: center;
   font-size: 12px;
   color: #999;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 8px;
 }
 
 .divider {
