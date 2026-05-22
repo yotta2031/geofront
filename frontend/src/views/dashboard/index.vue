@@ -4,7 +4,7 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="6" v-for="item in statCards" :key="item.title">
         <el-card class="stat-card" shadow="hover">
-          <div class="stat-icon" :style="{ background: item.gradient }">
+          <div class="stat-icon">
             <el-icon :size="24" color="#fff">
               <component :is="item.icon" />
             </el-icon>
@@ -171,7 +171,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped >
 .dashboard {
   padding: 0;
 }
@@ -181,6 +181,10 @@ onUnmounted(() => {
   align-items: center;
   padding: 10px;
 }
+.stat-card:hover{
+  cursor: pointer;
+}
+
 
 .stat-icon {
   width: 48px;
@@ -190,6 +194,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   margin-right: 16px;
+  background: #a375f2;
 }
 
 .stat-info {
