@@ -120,7 +120,7 @@
     <section class="panel mt-4">
       <div class="panel-header">
         <div>
-          <h2 class="panel-title">诊断记录</h2>
+          <h2 class="panel-title">诊断 记录</h2>
           <p class="panel-desc">最近 5 条诊断历史</p>
         </div>
         <el-button type="primary" link @click="$router.push('/diagnosis/reports')">
