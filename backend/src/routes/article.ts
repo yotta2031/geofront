@@ -1,15 +1,111 @@
 import { Hono } from "hono";
+import type { AppEnv } from "../types.js";
+import {
+  createKeyword,
+  updateKeyword,
+  listKeywords,
+  getKeyword,
+  deleteKeyword,
+} from "../app/services/keywordService.js";
+import {
+  createKeywordSchema,
+  updateKeywordSchema,
+} from "../app/schemas/keyword.js";
+import {
+  successResponse,
+  errorResponse,
+  paginatedResponse,
+} from "../utils/response.js";
 
-export const articleRoutes = new Hono();
+export const articleRoutes = new Hono<AppEnv>();
 
-// 关键词管理
+// ==================== 关键词管理 ====================
+
+/** 获取关键词列表（分页 + 搜索） */
 articleRoutes.get("/keywords", async (c) => {
-  return c.json({ code: 1, data: { list: [], total: 0 } });
+  const userId = c.get("user").userId;
+  const page = Number(c.req.query("page") || 1);
+  const pageSize = Number(c.req.query("pageSize") || 10);
+  const search = c.req.query("search");
+
+  try {
+    const { list, total } = await listKeywords(userId, page, pageSize, search);
+    return c.json(paginatedResponse(list, total, page, pageSize));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "查询关键词失败"), 500);
+  }
 });
 
+/** 创建关键词 */
 articleRoutes.post("/keywords", async (c) => {
+  const userId = c.get("user").userId;
   const body = await c.req.json();
-  return c.json({ code: 1, msg: "添加成功", data: null });
+
+  const parsed = createKeywordSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json(errorResponse(parsed.error.errors[0]?.message || "参数校验失败"), 400);
+  }
+
+  try {
+    const row = await createKeyword(userId, parsed.data);
+    return c.json(successResponse(row, "添加成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "添加关键词失败"), 500);
+  }
+});
+
+/** 更新关键词 */
+articleRoutes.put("/keywords/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+  const body = await c.req.json();
+
+  const parsed = updateKeywordSchema.safeParse({ ...body, id });
+  if (!parsed.success) {
+    return c.json(errorResponse(parsed.error.errors[0]?.message || "参数校验失败"), 400);
+  }
+
+  try {
+    const row = await updateKeyword(userId, id, parsed.data);
+    if (!row) {
+      return c.json(errorResponse("关键词不存在"), 404);
+    }
+    return c.json(successResponse(row, "更新成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "更新关键词失败"), 500);
+  }
+});
+
+/** 获取单个关键词 */
+articleRoutes.get("/keywords/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await getKeyword(userId, id);
+    if (!row) {
+      return c.json(errorResponse("关键词不存在"), 404);
+    }
+    return c.json(successResponse(row));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "查询关键词失败"), 500);
+  }
+});
+
+/** 删除关键词 */
+articleRoutes.delete("/keywords/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await deleteKeyword(userId, id);
+    if (!row) {
+      return c.json(errorResponse("关键词不存在"), 404);
+    }
+    return c.json(successResponse(null, "删除成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "删除关键词失败"), 500);
+  }
 });
 
 // 写作标题
