@@ -8,6 +8,13 @@ import {
   deleteKeyword,
 } from "../app/services/keywordService.js";
 import {
+  createArticleType,
+  updateArticleType,
+  listArticleTypes,
+  getArticleType,
+  deleteArticleType,
+} from "../app/services/articleTypeService.js";
+import {
   createKeywordSchema,
   updateKeywordSchema,
 } from "../app/schemas/keyword.js";
@@ -115,12 +122,67 @@ articleRoutes.get("/questions", async (c) => {
 
 // 文章分类
 articleRoutes.get("/types", async (c) => {
-  return c.json({ code: 1, data: { list: [], total: 0 } });
+  const userId = c.get("user").userId;
+  const page = Number(c.req.query("page") || 1);
+  const pageSize = Number(c.req.query("pageSize") || 10);
+  const search = c.req.query("search");
+
+  try {
+    const { list, total } = await listArticleTypes(userId, page, pageSize, search);
+    return c.json(paginatedResponse(list, total, page, pageSize));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "查询文章分类失败"), 500);
+  }
 });
 
 articleRoutes.post("/types", async (c) => {
+  const userId = c.get("user").userId;
   const body = await c.req.json();
-  return c.json({ code: 1, msg: "创建成功", data: null });
+
+  if (!body.name) {
+    return c.json(errorResponse("分类名称不能为空"), 400);
+  }
+
+  try {
+    const row = await createArticleType(userId, {
+      name: body.name,
+      description: body.description,
+    });
+    return c.json(successResponse(row, "创建成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "创建文章分类失败"), 500);
+  }
+});
+
+articleRoutes.put("/types/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+  const body = await c.req.json();
+
+  try {
+    const row = await updateArticleType(userId, id, body);
+    if (!row) {
+      return c.json(errorResponse("文章分类不存在"), 404);
+    }
+    return c.json(successResponse(row, "更新成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "更新文章分类失败"), 500);
+  }
+});
+
+articleRoutes.delete("/types/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await deleteArticleType(userId, id);
+    if (!row) {
+      return c.json(errorResponse("文章分类不存在"), 404);
+    }
+    return c.json(successResponse(null, "删除成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "删除文章分类失败"), 500);
+  }
 });
 
 // AI写作任务
