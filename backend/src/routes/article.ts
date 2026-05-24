@@ -23,6 +23,13 @@ import {
   runAiTask,
 } from "../app/services/aiTaskService.js";
 import {
+  createArticle,
+  updateArticle,
+  listArticles,
+  getArticle,
+  deleteArticle,
+} from "../app/services/articleService.js";
+import {
   createKeywordSchema,
   updateKeywordSchema,
 } from "../app/schemas/keyword.js";
@@ -272,10 +279,77 @@ articleRoutes.post("/tasks/:id/run", async (c) => {
 
 // 文章列表
 articleRoutes.get("/", async (c) => {
-  return c.json({ code: 1, data: { list: [], total: 0 } });
+  const userId = c.get("user").userId;
+  const page = Number(c.req.query("page") || 1);
+  const pageSize = Number(c.req.query("pageSize") || 10);
+  const keyword = c.req.query("keyword");
+
+  try {
+    const { list, total } = await listArticles(userId, page, pageSize, keyword);
+    return c.json(paginatedResponse(list, total, page, pageSize));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "查询文章失败"), 500);
+  }
 });
 
 articleRoutes.get("/:id", async (c) => {
-  const id = c.req.param("id");
-  return c.json({ code: 1, data: { id, title: "示例文章", content: "" } });
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await getArticle(userId, id);
+    if (!row) {
+      return c.json(errorResponse("文章不存在"), 404);
+    }
+    return c.json(successResponse(row));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "查询文章失败"), 500);
+  }
+});
+
+articleRoutes.post("/", async (c) => {
+  const userId = c.get("user").userId;
+  const body = await c.req.json();
+
+  if (!body.title) {
+    return c.json(errorResponse("文章标题不能为空"), 400);
+  }
+
+  try {
+    const row = await createArticle(userId, body);
+    return c.json(successResponse(row, "文章创建成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "创建文章失败"), 500);
+  }
+});
+
+articleRoutes.put("/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+  const body = await c.req.json();
+
+  try {
+    const row = await updateArticle(userId, id, body);
+    if (!row) {
+      return c.json(errorResponse("文章不存在"), 404);
+    }
+    return c.json(successResponse(row, "更新成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "更新文章失败"), 500);
+  }
+});
+
+articleRoutes.delete("/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await deleteArticle(userId, id);
+    if (!row) {
+      return c.json(errorResponse("文章不存在"), 404);
+    }
+    return c.json(successResponse(null, "删除成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "删除文章失败"), 500);
+  }
 });
