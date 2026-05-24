@@ -15,6 +15,14 @@ import {
   deleteArticleType,
 } from "../app/services/articleTypeService.js";
 import {
+  createAiTask,
+  updateAiTask,
+  listAiTasks,
+  getAiTask,
+  deleteAiTask,
+  runAiTask,
+} from "../app/services/aiTaskService.js";
+import {
   createKeywordSchema,
   updateKeywordSchema,
 } from "../app/schemas/keyword.js";
@@ -187,12 +195,79 @@ articleRoutes.delete("/types/:id", async (c) => {
 
 // AI写作任务
 articleRoutes.get("/tasks", async (c) => {
-  return c.json({ code: 1, data: { list: [], total: 0 } });
+  const userId = c.get("user").userId;
+  const page = Number(c.req.query("page") || 1);
+  const pageSize = Number(c.req.query("pageSize") || 10);
+  const search = c.req.query("search");
+
+  try {
+    const { list, total } = await listAiTasks(userId, page, pageSize, search);
+    return c.json(paginatedResponse(list, total, page, pageSize));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "查询任务失败"), 500);
+  }
 });
 
 articleRoutes.post("/tasks", async (c) => {
+  const userId = c.get("user").userId;
   const body = await c.req.json();
-  return c.json({ code: 1, msg: "任务创建成功", data: { taskId: "mock-task-id" } });
+
+  if (!body.name) {
+    return c.json(errorResponse("任务名称不能为空"), 400);
+  }
+
+  try {
+    const row = await createAiTask(userId, body);
+    return c.json(successResponse(row, "任务创建成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "创建任务失败"), 500);
+  }
+});
+
+articleRoutes.put("/tasks/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+  const body = await c.req.json();
+
+  try {
+    const row = await updateAiTask(userId, id, body);
+    if (!row) {
+      return c.json(errorResponse("任务不存在"), 404);
+    }
+    return c.json(successResponse(row, "更新成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "更新任务失败"), 500);
+  }
+});
+
+articleRoutes.delete("/tasks/:id", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await deleteAiTask(userId, id);
+    if (!row) {
+      return c.json(errorResponse("任务不存在"), 404);
+    }
+    return c.json(successResponse(null, "删除成功"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "删除任务失败"), 500);
+  }
+});
+
+articleRoutes.post("/tasks/:id/run", async (c) => {
+  const userId = c.get("user").userId;
+  const id = Number(c.req.param("id"));
+
+  try {
+    const row = await runAiTask(userId, id);
+    if (!row) {
+      return c.json(errorResponse("任务不存在"), 404);
+    }
+    return c.json(successResponse(row, "任务已启动"));
+  } catch (err: any) {
+    return c.json(errorResponse(err.message || "启动任务失败"), 500);
+  }
 });
 
 // 文章列表
