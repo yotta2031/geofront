@@ -8,6 +8,14 @@ export function createKeyword(data: any) {
   return api.post('/articles/keywords', data)
 }
 
+export function updateKeyword(id: number, data: any) {
+  return api.put(`/articles/keywords/${id}`, data)
+}
+
+export function deleteKeyword(id: number) {
+  return api.delete(`/articles/keywords/${id}`)
+}
+
 export function getArticleTypes(params?: any) {
   return api.get('/articles/types', { params })
 }

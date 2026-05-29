@@ -105,6 +105,265 @@ export const articles = pgTable("articles", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+// 网站媒体库
+export const webMedia = pgTable("web_media", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  industry: varchar("industry", { length: 50 }),
+  portal: varchar("portal", { length: 50 }),
+  region: varchar("region", { length: 50 }),
+  entryLevel: varchar("entry_level", { length: 30 }),
+  indexWeb: varchar("index_web", { length: 30 }),
+  indexNews: varchar("index_news", { length: 30 }),
+  linkType: varchar("link_type", { length: 30 }),
+  publishSpeed: varchar("publish_speed", { length: 30 }),
+  specialIndustry: varchar("special_industry", { length: 30 }),
+  weekendPublish: boolean("weekend_publish").default(false),
+  holidayPublish: boolean("holiday_publish").default(false),
+  nightPublish: boolean("night_publish").default(false),
+  hasTextLink: boolean("has_text_link").default(false),
+  whitelistSource: boolean("whitelist_source").default(false),
+  hasVideo: boolean("has_video").default(false),
+  mobileMedia: boolean("mobile_media").default(false),
+  longValidity: boolean("long_validity").default(false),
+  geoRankable: boolean("geo_rankable").default(false),
+  price: doublePrecision("price").notNull().default(0),
+  pcWeight: integer("pc_weight").default(0),
+  mobileWeight: integer("mobile_weight").default(0),
+  successRate: integer("success_rate").default(0),
+  publishTimeMinutes: integer("publish_time_minutes").default(0),
+  remark: text("remark"),
+  tags: jsonb("tags").$type<string[]>().default([]),
+  caseUrl: text("case_url"),
+  status: integer("status").default(1),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 网站媒体收藏分组
+export const webMediaFavoriteGroups = pgTable("web_media_favorite_groups", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 网站媒体收藏
+export const webMediaFavorites = pgTable("web_media_favorites", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  mediaId: integer("media_id")
+    .notNull()
+    .references(() => webMedia.id, { onDelete: "cascade" }),
+  groupId: integer("group_id").references(() => webMediaFavoriteGroups.id, {
+    onDelete: "set null",
+  }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 网站媒体投稿记录
+export const webMediaSubmissions = pgTable("web_media_submissions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  mediaId: integer("media_id")
+    .notNull()
+    .references(() => webMedia.id),
+  articleId: integer("article_id"),
+  title: varchar("title", { length: 500 }).notNull(),
+  content: text("content"),
+  price: doublePrecision("price").default(0),
+  status: varchar("status", { length: 20 }).default("pending"),
+  publishUrl: text("publish_url"),
+  errorMsg: text("error_msg"),
+  submittedAt: timestamp("submitted_at", { withTimezone: true }).defaultNow(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+});
+
+// 网站媒体 AI 发布任务
+export const webMediaPublishTasks = pgTable("web_media_publish_tasks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  articleIds: jsonb("article_ids").$type<number[]>().default([]),
+  mediaIds: jsonb("media_ids").$type<number[]>().default([]),
+  publishType: varchar("publish_type", { length: 20 }).default("immediate"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  totalCount: integer("total_count").default(0),
+  successCount: integer("success_count").default(0),
+  failCount: integer("fail_count").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
+
+// 个人自媒体 - 设备授权码（每用户一个）
+export const weixinDeviceAuth = pgTable("weixin_device_auth", {
+  userId: integer("user_id").primaryKey(),
+  authCode: varchar("auth_code", { length: 20 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// 个人自媒体 - 已授权账号
+export const weixinAccounts = pgTable("weixin_accounts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  accountName: varchar("account_name", { length: 200 }).notNull(),
+  avatar: text("avatar"),
+  platform: varchar("platform", { length: 50 }).notNull(),
+  platformUid: varchar("platform_uid", { length: 100 }),
+  publishEnabled: boolean("publish_enabled").default(true),
+  fansCount: integer("fans_count").default(0),
+  maxDailyPublish: integer("max_daily_publish").default(5),
+  proxyIpPort: varchar("proxy_ip_port", { length: 100 }),
+  proxyAuth: varchar("proxy_auth", { length: 200 }),
+  remark: varchar("remark", { length: 500 }),
+  authStatus: varchar("auth_status", { length: 20 }).default("authorized"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// 个人自媒体 - 发布任务
+export const weixinPublishTasks = pgTable("weixin_publish_tasks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  articleIds: jsonb("article_ids").$type<number[]>().default([]),
+  accountIds: jsonb("account_ids").$type<number[]>().default([]),
+  publishType: varchar("publish_type", { length: 20 }).default("immediate"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  totalCount: integer("total_count").default(0),
+  successCount: integer("success_count").default(0),
+  failCount: integer("fail_count").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
+
+// 个人自媒体 - 发布记录
+export const weixinPublishRecords = pgTable("weixin_publish_records", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  accountId: integer("account_id").references(() => weixinAccounts.id),
+  articleId: integer("article_id"),
+  taskId: integer("task_id"),
+  title: varchar("title", { length: 500 }).notNull(),
+  platform: varchar("platform", { length: 50 }),
+  accountName: varchar("account_name", { length: 200 }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  publishUrl: text("publish_url"),
+  errorMsg: text("error_msg"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// 自媒体大V - 账号
+export const zimediaAccounts = pgTable("zimedia_accounts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  accountName: varchar("account_name", { length: 200 }).notNull(),
+  platform: varchar("platform", { length: 50 }).notNull(),
+  avatar: text("avatar"),
+  fansCount: integer("fans_count").default(0),
+  category: varchar("category", { length: 50 }).default("其他"),
+  quotePrice: integer("quote_price").default(0),
+  maxDailyPublish: integer("max_daily_publish").default(5),
+  proxyIpPort: varchar("proxy_ip_port", { length: 200 }),
+  proxyAuth: varchar("proxy_auth", { length: 200 }),
+  remark: text("remark"),
+  publishEnabled: boolean("publish_enabled").default(true),
+  coopStatus: varchar("coop_status", { length: 20 }).default("active"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// 自媒体大V - 发布任务
+export const zimediaPublishTasks = pgTable("zimedia_publish_tasks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  articleIds: jsonb("article_ids").$type<number[]>().notNull(),
+  accountIds: jsonb("account_ids").$type<number[]>().notNull(),
+  publishType: varchar("publish_type", { length: 20 }).default("immediate"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  totalCount: integer("total_count").default(0),
+  successCount: integer("success_count").default(0),
+  failCount: integer("fail_count").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
+
+// 自媒体大V - 发布记录
+export const zimediaPublishRecords = pgTable("zimedia_publish_records", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  accountId: integer("account_id").references(() => zimediaAccounts.id),
+  articleId: integer("article_id"),
+  taskId: integer("task_id"),
+  title: varchar("title", { length: 500 }).notNull(),
+  platform: varchar("platform", { length: 50 }),
+  accountName: varchar("account_name", { length: 200 }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  publishUrl: text("publish_url"),
+  errorMsg: text("error_msg"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// AI官网SEO - 站点
+export const siteWebsites = pgTable("site_websites", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  siteName: varchar("site_name", { length: 200 }).notNull(),
+  siteUrl: varchar("site_url", { length: 500 }).notNull(),
+  cmsType: varchar("cms_type", { length: 50 }).default("WordPress"),
+  apiEndpoint: varchar("api_endpoint", { length: 500 }),
+  apiKey: varchar("api_key", { length: 500 }),
+  sitemapUrl: varchar("sitemap_url", { length: 500 }),
+  maxDailyPublish: integer("max_daily_publish").default(5),
+  publishEnabled: boolean("publish_enabled").default(true),
+  connectStatus: varchar("connect_status", { length: 20 }).default("connected"),
+  seoScore: integer("seo_score").default(0),
+  remark: text("remark"),
+  lastPublishAt: timestamp("last_publish_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// AI官网SEO - 发布任务
+export const sitePublishTasks = pgTable("site_publish_tasks", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  name: varchar("name", { length: 200 }).notNull(),
+  articleIds: jsonb("article_ids").$type<number[]>().notNull(),
+  siteIds: jsonb("site_ids").$type<number[]>().notNull(),
+  publishType: varchar("publish_type", { length: 20 }).default("immediate"),
+  scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  totalCount: integer("total_count").default(0),
+  successCount: integer("success_count").default(0),
+  failCount: integer("fail_count").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+});
+
+// AI官网SEO - 发布记录
+export const sitePublishRecords = pgTable("site_publish_records", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  siteId: integer("site_id").references(() => siteWebsites.id),
+  articleId: integer("article_id"),
+  taskId: integer("task_id"),
+  title: varchar("title", { length: 500 }).notNull(),
+  siteName: varchar("site_name", { length: 200 }),
+  siteUrl: varchar("site_url", { length: 500 }),
+  status: varchar("status", { length: 20 }).default("pending"),
+  publishUrl: text("publish_url"),
+  errorMsg: text("error_msg"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
 // 发布记录表
 export const publishRecords = pgTable("publish_records", {
   id: serial("id").primaryKey(),

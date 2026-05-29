@@ -38,7 +38,7 @@
           <el-table-column label="操作" width="140" fixed="right">
             <template #default="{ row }">
               <el-button type="primary" link @click="editKeyword(row)">编辑</el-button>
-              <el-button type="danger" link @click="deleteKeyword(row.id)">删除</el-button>
+              <el-button type="danger" link @click="handleDelete(row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -90,7 +90,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { getKeywords, createKeyword } from '@/api/article'
+import { getKeywords, createKeyword, updateKeyword, deleteKeyword as deleteKeywordApi } from '@/api/article'
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -142,11 +142,16 @@ function editKeyword(row: any) {
   showAddDialog.value = true
 }
 
-async function deleteKeyword(_id: number) {
+async function handleDelete(id: number) {
   try {
     await ElMessageBox.confirm('确定要删除这个关键词吗？', '提示', { type: 'warning' })
-    ElMessage.success('删除成功')
-    fetchKeywords()
+    const res = await deleteKeywordApi(id)
+    if (res.code === 1) {
+      ElMessage.success('删除成功')
+      fetchKeywords()
+    } else {
+      ElMessage.error(res.msg || '删除失败')
+    }
   } catch {
     // 用户取消
   }
@@ -160,12 +165,19 @@ async function submitForm() {
 
   submitting.value = true
   try {
-    const res = await createKeyword(form)
+    let res
+    if (editingId.value) {
+      res = await updateKeyword(editingId.value, form)
+    } else {
+      res = await createKeyword(form)
+    }
     if (res.code === 1) {
       ElMessage.success(editingId.value ? '更新成功' : '添加成功')
       showAddDialog.value = false
       resetForm()
       fetchKeywords()
+    } else {
+      ElMessage.error(res.msg || '操作失败')
     }
   } finally {
     submitting.value = false
